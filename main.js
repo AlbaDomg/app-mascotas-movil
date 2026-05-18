@@ -1,3 +1,12 @@
+// Settings
+const defaultSettings = {
+  pet1: 'Gato',
+  pet2: 'Perro',
+  person1: 'Alba',
+  person2: 'Santi'
+};
+let settings = JSON.parse(localStorage.getItem('miauguau_settings')) || defaultSettings;
+
 // State
 let selectedPet = null;
 let selectedPerson = null;
@@ -13,17 +22,30 @@ const submitBtn = document.getElementById('submit-btn');
 const historyList = document.getElementById('history-list');
 const clearBtn = document.getElementById('clear-btn');
 
+const settingsBtn = document.getElementById('settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const closeSettingsBtn = document.getElementById('close-settings-btn');
+const saveSettingsBtn = document.getElementById('save-settings-btn');
+const customDateInput = document.getElementById('custom-date');
+const customTimeInput = document.getElementById('custom-time');
+
 // Emojis mapping
 const emojis = {
-  'Gato': '🐱',
-  'Perro': '🐶',
-  'Alba': '👩🏻',
-  'Santi': '👨🏻'
+  'pet1': '🐱',
+  'pet2': '🐶',
+  'person1': '👩🏻',
+  'person2': '👨🏻'
 };
 
 // Initialize
 function init() {
+  applySettingsToDOM();
   renderHistory();
+  
+  // Settings listeners
+  settingsBtn.addEventListener('click', openSettings);
+  closeSettingsBtn.addEventListener('click', closeSettings);
+  saveSettingsBtn.addEventListener('click', saveSettings);
   
   // Event Listeners for Pet selection
   petCards.forEach(card => {
@@ -33,7 +55,7 @@ function init() {
       selectedPet = card.getAttribute('data-value');
       
       // Show/Hide action section for dog
-      if (selectedPet === 'Perro') {
+      if (selectedPet === 'pet2') {
         actionSection.classList.remove('hidden');
       } else {
         actionSection.classList.add('hidden');
@@ -104,20 +126,35 @@ function resetSelection() {
 }
 
 function addRecord() {
-  const now = new Date();
+  let recordDate = new Date();
   
+  if (customDateInput.value) {
+    const [year, month, day] = customDateInput.value.split('-');
+    recordDate.setFullYear(year, month - 1, day);
+  }
+  
+  if (customTimeInput.value) {
+    const [hours, minutes] = customTimeInput.value.split(':');
+    recordDate.setHours(hours, minutes, 0, 0);
+  }
+
   const record = {
     id: Date.now(),
-    pet: selectedPet,
-    person: selectedPerson,
+    petId: selectedPet,
+    petName: settings[selectedPet],
+    personId: selectedPerson,
+    personName: settings[selectedPerson],
     action: selectedAction,
-    time: now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-    date: now.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-    timestamp: now.getTime()
+    time: recordDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+    date: recordDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+    timestamp: recordDate.getTime()
   };
 
   history.unshift(record); // Add to beginning
   
+  // Sort history by timestamp descending (newest first) just in case a custom date was added
+  history.sort((a, b) => b.timestamp - a.timestamp);
+
   // Keep only the last 20 records to save space
   if (history.length > 20) {
     history = history.slice(0, 20);
@@ -125,6 +162,10 @@ function addRecord() {
 
   saveHistory();
   renderHistory();
+  
+  // reset custom inputs
+  customDateInput.value = '';
+  customTimeInput.value = '';
 }
 
 function saveHistory() {
@@ -147,14 +188,20 @@ function renderHistory() {
     const isPill = record.action && record.action.includes('Pastilla');
     const actionText = isPill ? record.action : 'Comida';
     
+    // Backwards compatibility for old records
+    const petEmoji = record.petId ? emojis[record.petId] : (record.pet === 'Gato' ? '🐱' : '🐶');
+    const personEmoji = record.personId ? emojis[record.personId] : (record.person === 'Alba' ? '👩🏻' : '👨🏻');
+    const petName = record.petName || record.pet;
+    const personName = record.personName || record.person;
+    
     li.innerHTML = `
       <div class="history-info">
         <div class="history-avatar">
-          ${emojis[record.pet]}
+          ${petEmoji}
         </div>
         <div class="history-details">
-          <h3>${record.pet} <span style="font-size: 14px; font-weight: 400; color: var(--text-secondary);">(${actionText})</span></h3>
-          <p>${record.person} <span>${emojis[record.person]}</span></p>
+          <h3>${petName} <span style="font-size: 14px; font-weight: 400; color: var(--text-secondary);">(${actionText})</span></h3>
+          <p>${personName} <span>${personEmoji}</span></p>
         </div>
       </div>
       <div class="history-time">
@@ -164,6 +211,51 @@ function renderHistory() {
     `;
     historyList.appendChild(li);
   });
+}
+
+// Settings Functions
+function applySettingsToDOM() {
+  document.getElementById('pet1-label').textContent = settings.pet1;
+  document.getElementById('pet2-label').textContent = settings.pet2;
+  document.getElementById('person1-label').textContent = settings.person1;
+  document.getElementById('person2-label').textContent = settings.person2;
+}
+
+function openSettings() {
+  document.getElementById('pet1-input').value = settings.pet1;
+  document.getElementById('pet2-input').value = settings.pet2;
+  document.getElementById('person1-input').value = settings.person1;
+  document.getElementById('person2-input').value = settings.person2;
+  settingsModal.classList.remove('hidden');
+}
+
+function closeSettings() {
+  settingsModal.classList.add('hidden');
+}
+
+function saveSettings() {
+  settings.pet1 = document.getElementById('pet1-input').value.trim() || defaultSettings.pet1;
+  settings.pet2 = document.getElementById('pet2-input').value.trim() || defaultSettings.pet2;
+  settings.person1 = document.getElementById('person1-input').value.trim() || defaultSettings.person1;
+  settings.person2 = document.getElementById('person2-input').value.trim() || defaultSettings.person2;
+  
+  localStorage.setItem('miauguau_settings', JSON.stringify(settings));
+  
+  applySettingsToDOM();
+  // Optional: Update history rendering to reflect new names for past records?
+  // Since we save petName in record, old records will keep their name unless we dynamically map them.
+  // Actually, we probably want to update history rendering if they just fixed a typo.
+  // Let's iterate history and update petName/personName if it matches the old settings?
+  // It's safer to just let new names apply to new records, but maybe users want to update all.
+  // We'll update the history in memory for matching petId and personId just in case.
+  history.forEach(r => {
+    if (r.petId) r.petName = settings[r.petId];
+    if (r.personId) r.personName = settings[r.personId];
+  });
+  saveHistory();
+  renderHistory();
+  
+  closeSettings();
 }
 
 // Start app

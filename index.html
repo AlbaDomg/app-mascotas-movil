@@ -10,8 +10,11 @@
   <body>
     <div class="app-container">
       <header class="header">
-        <h1>MIAUGUAU<span>CONTROL</span></h1>
-        <p>Registro de alimentación</p>
+        <div class="header-titles">
+          <h1>MIAUGUAU<span>CONTROL</span></h1>
+          <p>Registro de alimentación</p>
+        </div>
+        <button id="settings-btn" class="settings-btn" aria-label="Ajustes">⚙️</button>
       </header>
 
       <main class="main-content">
@@ -19,13 +22,13 @@
         <section class="selection-group">
           <h2>¿Quién ha comido?</h2>
           <div class="options-grid" id="pet-options">
-            <button class="option-card" data-type="pet" data-value="Gato">
+            <button class="option-card" data-type="pet" data-value="pet1" id="pet1-btn">
               <span class="emoji">🐱</span>
-              <span class="label">Gato</span>
+              <span class="label" id="pet1-label">Gato</span>
             </button>
-            <button class="option-card" data-type="pet" data-value="Perro">
+            <button class="option-card" data-type="pet" data-value="pet2" id="pet2-btn">
               <span class="emoji">🐶</span>
-              <span class="label">Perro</span>
+              <span class="label" id="pet2-label">Perro</span>
             </button>
           </div>
         </section>
@@ -53,14 +56,23 @@
         <section class="selection-group">
           <h2>¿Quién le dio?</h2>
           <div class="options-grid" id="person-options">
-            <button class="option-card" data-type="person" data-value="Alba">
+            <button class="option-card" data-type="person" data-value="person1" id="person1-btn">
               <span class="emoji">👩🏻</span>
-              <span class="label">Alba</span>
+              <span class="label" id="person1-label">Alba</span>
             </button>
-            <button class="option-card" data-type="person" data-value="Santi">
+            <button class="option-card" data-type="person" data-value="person2" id="person2-btn">
               <span class="emoji">👨🏻</span>
-              <span class="label">Santi</span>
+              <span class="label" id="person2-label">Santi</span>
             </button>
+          </div>
+        </section>
+
+        <!-- DATE AND TIME SELECTION -->
+        <section class="selection-group datetime-group">
+          <h2>¿Cuándo? <span style="font-size: 14px; font-weight: 400; color: var(--text-secondary);">(Opcional)</span></h2>
+          <div class="datetime-inputs">
+            <input type="date" id="custom-date" class="custom-input">
+            <input type="time" id="custom-time" class="custom-input">
           </div>
         </section>
 
@@ -82,6 +94,35 @@
           </ul>
         </section>
       </main>
+
+      <!-- SETTINGS MODAL -->
+      <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+          <h2>Ajustes</h2>
+          <div class="settings-form">
+            <div class="form-group">
+              <label for="pet1-input">Mascota 1 (🐱)</label>
+              <input type="text" id="pet1-input" class="custom-input" placeholder="Gato">
+            </div>
+            <div class="form-group">
+              <label for="pet2-input">Mascota 2 (🐶)</label>
+              <input type="text" id="pet2-input" class="custom-input" placeholder="Perro">
+            </div>
+            <div class="form-group">
+              <label for="person1-input">Persona 1 (👩🏻)</label>
+              <input type="text" id="person1-input" class="custom-input" placeholder="Alba">
+            </div>
+            <div class="form-group">
+              <label for="person2-input">Persona 2 (👨🏻)</label>
+              <input type="text" id="person2-input" class="custom-input" placeholder="Santi">
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button id="close-settings-btn" class="secondary-btn">Cancelar</button>
+            <button id="save-settings-btn" class="primary-btn">Guardar</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/main.js"></script>
