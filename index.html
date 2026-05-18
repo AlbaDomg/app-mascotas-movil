@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Miauguau Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="header">
+        <h1>MIAUGUAU<span>CONTROL</span></h1>
+        <p>Registro de alimentación</p>
+      </header>
+
+      <main class="main-content">
+        <!-- PET SELECTION -->
+        <section class="selection-group">
+          <h2>¿Quién ha comido?</h2>
+          <div class="options-grid" id="pet-options">
+            <button class="option-card" data-type="pet" data-value="Gato">
+              <span class="emoji">🐱</span>
+              <span class="label">Gato</span>
+            </button>
+            <button class="option-card" data-type="pet" data-value="Perro">
+              <span class="emoji">🐶</span>
+              <span class="label">Perro</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ACTION SELECTION (Only for Dog) -->
+        <section class="selection-group hidden" id="action-section">
+          <h2>¿Qué le has dado?</h2>
+          <div class="options-grid grid-3" id="action-options">
+            <button class="option-card selected" data-type="action" data-value="Comida">
+              <span class="emoji">🍲</span>
+              <span class="label">Comida</span>
+            </button>
+            <button class="option-card" data-type="action" data-value="Media Pastilla">
+              <span class="emoji">💊</span>
+              <span class="label">Media Pastilla</span>
+            </button>
+            <button class="option-card" data-type="action" data-value="Pastilla Entera">
+              <span class="emoji">💊</span>
+              <span class="label">Pastilla Entera</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- PERSON SELECTION -->
+        <section class="selection-group">
+          <h2>¿Quién le dio?</h2>
+          <div class="options-grid" id="person-options">
+            <button class="option-card" data-type="person" data-value="Alba">
+              <span class="emoji">👩🏻</span>
+              <span class="label">Alba</span>
+            </button>
+            <button class="option-card" data-type="person" data-value="Santi">
+              <span class="emoji">👨🏻</span>
+              <span class="label">Santi</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- SUBMIT BUTTON -->
+        <div class="action-container">
+          <button id="submit-btn" class="submit-btn" disabled>
+            Registrar Comida
+          </button>
+        </div>
+
+        <!-- HISTORY SECTION -->
+        <section class="history-section">
+          <div class="history-header">
+            <h2>Últimas Comidas</h2>
+            <button id="clear-btn" class="clear-btn">Borrar</button>
+          </div>
+          <ul id="history-list" class="history-list">
+            <!-- Records will be injected here via JS -->
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
