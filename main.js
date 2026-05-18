@@ -1,3 +1,20 @@
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, onValue, push, remove } from "firebase/database";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB6_ZJ6fVouKC1r1IPlCZ2LvpCaPpos7TY",
+  authDomain: "miauguau-control.firebaseapp.com",
+  databaseURL: "https://miauguau-control-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "miauguau-control",
+  storageBucket: "miauguau-control.firebasestorage.app",
+  messagingSenderId: "486782707960",
+  appId: "1:486782707960:web:b8f0ac7a65480bbf44f30d"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
 // Settings
 const defaultSettings = {
   pet1: 'Gato',
@@ -5,13 +22,13 @@ const defaultSettings = {
   person1: 'Alba',
   person2: 'Santi'
 };
-let settings = JSON.parse(localStorage.getItem('miauguau_settings')) || defaultSettings;
+let settings = { ...defaultSettings };
 
 // State
 let selectedPet = null;
 let selectedPerson = null;
 let selectedAction = 'Comida';
-let history = JSON.parse(localStorage.getItem('miauguau_history')) || [];
+let history = [];
 
 // DOM Elements
 const petCards = document.querySelectorAll('.option-card[data-type="pet"]');
@@ -40,7 +57,33 @@ const emojis = {
 // Initialize
 function init() {
   applySettingsToDOM();
-  renderHistory();
+  
+  // Listen for settings changes from Firebase
+  const settingsRef = ref(database, 'settings');
+  onValue(settingsRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      settings = data;
+    } else {
+      settings = { ...defaultSettings };
+    }
+    applySettingsToDOM();
+  });
+
+  // Listen for history changes from Firebase
+  const historyRef = ref(database, 'history');
+  onValue(historyRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      // Convert Firebase object to array
+      history = Object.values(data);
+      // Sort by timestamp descending
+      history.sort((a, b) => b.timestamp - a.timestamp);
+    } else {
+      history = [];
+    }
+    renderHistory();
+  });
   
   // Settings listeners
   settingsBtn.addEventListener('click', openSettings);
@@ -104,10 +147,9 @@ function init() {
 
   // Clear history
   clearBtn.addEventListener('click', () => {
-    if (confirm('¿Seguro que quieres borrar el historial?')) {
-      history = [];
-      saveHistory();
-      renderHistory();
+    if (confirm('¿Seguro que quieres borrar el historial para TODOS los dispositivos?')) {
+      const historyRef = ref(database, 'history');
+      remove(historyRef); // Clear in Firebase
     }
   });
 }
@@ -156,26 +198,14 @@ function addRecord() {
     timestamp: recordDate.getTime()
   };
 
-  history.unshift(record); // Add to beginning
-  
-  // Sort history by timestamp descending (newest first) just in case a custom date was added
-  history.sort((a, b) => b.timestamp - a.timestamp);
-
-  // Keep only the last 20 records to save space
-  if (history.length > 20) {
-    history = history.slice(0, 20);
-  }
-
-  saveHistory();
-  renderHistory();
+  // Save to Firebase
+  const historyRef = ref(database, 'history');
+  const newRecordRef = push(historyRef);
+  set(newRecordRef, record);
   
   // reset custom inputs
   customDateInput.value = '';
   customTimeInput.value = '';
-}
-
-function saveHistory() {
-  localStorage.setItem('miauguau_history', JSON.stringify(history));
 }
 
 function renderHistory() {
@@ -186,7 +216,10 @@ function renderHistory() {
     return;
   }
 
-  history.forEach(record => {
+  // Keep only the last 30 records for display
+  const displayHistory = history.slice(0, 30);
+
+  displayHistory.forEach(record => {
     const li = document.createElement('li');
     li.className = 'history-item';
     
@@ -220,17 +253,17 @@ function renderHistory() {
 
 // Settings Functions
 function applySettingsToDOM() {
-  document.getElementById('pet1-label').textContent = settings.pet1;
-  document.getElementById('pet2-label').textContent = settings.pet2;
-  document.getElementById('person1-label').textContent = settings.person1;
-  document.getElementById('person2-label').textContent = settings.person2;
+  document.getElementById('pet1-label').textContent = settings.pet1 || defaultSettings.pet1;
+  document.getElementById('pet2-label').textContent = settings.pet2 || defaultSettings.pet2;
+  document.getElementById('person1-label').textContent = settings.person1 || defaultSettings.person1;
+  document.getElementById('person2-label').textContent = settings.person2 || defaultSettings.person2;
 }
 
 function openSettings() {
-  document.getElementById('pet1-input').value = settings.pet1;
-  document.getElementById('pet2-input').value = settings.pet2;
-  document.getElementById('person1-input').value = settings.person1;
-  document.getElementById('person2-input').value = settings.person2;
+  document.getElementById('pet1-input').value = settings.pet1 || defaultSettings.pet1;
+  document.getElementById('pet2-input').value = settings.pet2 || defaultSettings.pet2;
+  document.getElementById('person1-input').value = settings.person1 || defaultSettings.person1;
+  document.getElementById('person2-input').value = settings.person2 || defaultSettings.person2;
   settingsModal.classList.remove('hidden');
 }
 
@@ -239,26 +272,16 @@ function closeSettings() {
 }
 
 function saveSettings() {
-  settings.pet1 = document.getElementById('pet1-input').value.trim() || defaultSettings.pet1;
-  settings.pet2 = document.getElementById('pet2-input').value.trim() || defaultSettings.pet2;
-  settings.person1 = document.getElementById('person1-input').value.trim() || defaultSettings.person1;
-  settings.person2 = document.getElementById('person2-input').value.trim() || defaultSettings.person2;
+  const newSettings = {
+    pet1: document.getElementById('pet1-input').value.trim() || defaultSettings.pet1,
+    pet2: document.getElementById('pet2-input').value.trim() || defaultSettings.pet2,
+    person1: document.getElementById('person1-input').value.trim() || defaultSettings.person1,
+    person2: document.getElementById('person2-input').value.trim() || defaultSettings.person2
+  };
   
-  localStorage.setItem('miauguau_settings', JSON.stringify(settings));
-  
-  applySettingsToDOM();
-  // Optional: Update history rendering to reflect new names for past records?
-  // Since we save petName in record, old records will keep their name unless we dynamically map them.
-  // Actually, we probably want to update history rendering if they just fixed a typo.
-  // Let's iterate history and update petName/personName if it matches the old settings?
-  // It's safer to just let new names apply to new records, but maybe users want to update all.
-  // We'll update the history in memory for matching petId and personId just in case.
-  history.forEach(r => {
-    if (r.petId) r.petName = settings[r.petId];
-    if (r.personId) r.personName = settings[r.personId];
-  });
-  saveHistory();
-  renderHistory();
+  // Save to Firebase
+  const settingsRef = ref(database, 'settings');
+  set(settingsRef, newSettings);
   
   closeSettings();
 }
