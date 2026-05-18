@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Miauguau">
     <title>Miauguau Control</title>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css" />
   </head>
@@ -33,10 +39,24 @@
           </div>
         </section>
 
-        <!-- ACTION SELECTION (Only for Dog) -->
+        <!-- ACTION SELECTION -->
         <section class="selection-group hidden" id="action-section">
           <h2>¿Qué le has dado?</h2>
-          <div class="options-grid grid-3" id="action-options">
+          
+          <!-- Cat Options -->
+          <div class="options-grid" id="cat-action-options" style="display: none;">
+            <button class="option-card selected" data-type="action" data-value="Pienso">
+              <span class="emoji">🥣</span>
+              <span class="label">Pienso</span>
+            </button>
+            <button class="option-card" data-type="action" data-value="Comida Húmeda">
+              <span class="emoji">🥫</span>
+              <span class="label">Comida Húmeda</span>
+            </button>
+          </div>
+
+          <!-- Dog Options -->
+          <div class="options-grid grid-3" id="dog-action-options" style="display: none;">
             <button class="option-card selected" data-type="action" data-value="Comida">
               <span class="emoji">🍲</span>
               <span class="label">Comida</span>

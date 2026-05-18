@@ -1,0 +1,17 @@
+{
+  "name": "Miauguau Control",
+  "short_name": "Miauguau",
+  "description": "Registro de alimentación para tus mascotas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#FF6B00",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

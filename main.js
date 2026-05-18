@@ -54,14 +54,21 @@ function init() {
       card.classList.add('selected');
       selectedPet = card.getAttribute('data-value');
       
-      // Show/Hide action section for dog
+      // Show action section for both
+      actionSection.classList.remove('hidden');
+      
+      actionCards.forEach(c => c.classList.remove('selected'));
+      
       if (selectedPet === 'pet2') {
-        actionSection.classList.remove('hidden');
-      } else {
-        actionSection.classList.add('hidden');
+        document.getElementById('cat-action-options').style.display = 'none';
+        document.getElementById('dog-action-options').style.display = 'grid';
         selectedAction = 'Comida';
-        actionCards.forEach(c => c.classList.remove('selected'));
-        actionCards[0].classList.add('selected'); // Reset to Comida
+        document.querySelector('#dog-action-options .option-card[data-value="Comida"]').classList.add('selected');
+      } else {
+        document.getElementById('cat-action-options').style.display = 'grid';
+        document.getElementById('dog-action-options').style.display = 'none';
+        selectedAction = 'Pienso';
+        document.querySelector('#cat-action-options .option-card[data-value="Pienso"]').classList.add('selected');
       }
       
       checkSubmitState();
@@ -116,11 +123,10 @@ function checkSubmitState() {
 function resetSelection() {
   selectedPet = null;
   selectedPerson = null;
-  selectedAction = 'Comida';
+  selectedAction = null;
   petCards.forEach(c => c.classList.remove('selected'));
   personCards.forEach(c => c.classList.remove('selected'));
   actionCards.forEach(c => c.classList.remove('selected'));
-  actionCards[0].classList.add('selected'); // Reset to Comida
   actionSection.classList.add('hidden');
   checkSubmitState();
 }
@@ -185,8 +191,7 @@ function renderHistory() {
     li.className = 'history-item';
     
     // Determine the text based on action
-    const isPill = record.action && record.action.includes('Pastilla');
-    const actionText = isPill ? record.action : 'Comida';
+    const actionText = record.action || 'Comida';
     
     // Backwards compatibility for old records
     const petEmoji = record.petId ? emojis[record.petId] : (record.pet === 'Gato' ? '🐱' : '🐶');
